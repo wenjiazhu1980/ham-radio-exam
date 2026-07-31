@@ -1,0 +1,7 @@
+.DS_Store
+.workbuddy/
+*.log
+.idea/
+.vscode/
+*.swp
+*~

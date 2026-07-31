@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>业余无线电 A 类知识图谱 (整合版)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0c0c1d 0%, #1a1a3e 50%, #0d0d2b 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 20px 20px;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid rgba(100,140,255,0.2);
+        }
+        .header h1 {
+            font-size: 2em;
+            background: linear-gradient(90deg, #64b5f6, #42a5f5, #90caf9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .header .subtitle {
+            color: #90a4ae;
+            font-size: 0.95em;
+        }
+        .header .badge {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 4px 14px;
+            background: rgba(66,165,245,0.15);
+            border: 1px solid rgba(66,165,245,0.4);
+            border-radius: 20px;
+            font-size: 0.8em;
+            color: #64b5f6;
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 24px;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .back-link::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .back-link:hover::before {
+            opacity: 1;
+        }
+
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.45);
+        }
+
+        .back-link > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-link svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            .back-link {
+                font-size: 0.85rem;
+                padding: 8px 16px;
+            }
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 16px;
+            background: rgba(0,0,0,0.2);
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-num {
+            font-size: 1.6em;
+            font-weight: 700;
+            color: #42a5f5;
+        }
+        .stat-label {
+            font-size: 0.75em;
+            color: #78909c;
+            margin-top: 2px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .category-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--accent);
+            opacity: 0.8;
+        }
+        .category-card:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        .category-card.active {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.2);
+        }
+
+        .card-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .card-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+        .card-desc {
+            font-size: 0.8em;
+            color: #90a4ae;
+            line-height: 1.5;
+        }
+        .card-count {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 2px 10px;
+            background: rgba(var(--accent-rgb), 0.15);
+            border-radius: 12px;
+            font-size: 0.75em;
+            color: var(--accent);
+        }
+
+        .detail-panel {
+            display: none;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            animation: fadeIn 0.3s ease;
+        }
+        .detail-panel.visible {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .detail-icon { font-size: 2.2em; }
+        .detail-title { font-size: 1.4em; font-weight: 700; color: #fff; }
+        .detail-subtitle { font-size: 0.85em; color: #78909c; margin-top: 4px; }
+
+        .close-btn {
+            margin-left: auto;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #90a4ae;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: all 0.2s;
+        }
+        .close-btn:hover {
+            background: rgba(255,80,80,0.2);
+            color: #ef5350;
+        }
+
+        .nodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 12px;
+        }
+        .node-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 14px;
+            transition: all 0.2s;
+        }
+        .node-item:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.15);
+        }
+        .node-code {
+            font-size: 0.7em;
+            color: #64b5f6;
+            font-family: monospace;
+            margin-bottom: 6px;
+        }
+        .node-title {
+            font-size: 0.9em;
+            font-weight: 500;
+            color: #e0e0e0;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .node-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .tag {
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 0.65em;
+            background: rgba(100,180,255,0.1);
+            color: #64b5f6;
+        }
+        .tag.hot {
+            background: rgba(239,83,80,0.15);
+            color: #ef5350;
+        }
+        .tag.new {
+            background: rgba(102,187,106,0.15);
+            color: #66bb6a;
+        }
+        .tag.multi {
+            background: rgba(255,167,38,0.18);
+            color: #f59e0b;
+        }
+        .tag.star {
+            background: rgba(255,64,129,0.15);
+            color: #ff4081;
+        }
+
+        .mindmap-container {
+            display: none;
+            position: relative;
+            width: 100%;
+            min-height: 600px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            overflow: auto;
+            padding: 40px;
+        }
+        .mindmap-container.visible {
+            display: block;
+        }
+
+        .mindmap-center {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(66,165,245,0.3), rgba(66,165,245,0.05));
+            border: 2px solid rgba(66,165,245,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1em;
+            color: #64b5f6;
+            z-index: 10;
+        }
+
+        .mindmap-branch {
+            position: absolute;
+            padding: 14px 18px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            cursor: pointer;
+            transition: all 0.3s;
+            max-width: 200px;
+            text-align: center;
+        }
+        .mindmap-branch:hover {
+            background: rgba(255,255,255,0.12);
+            transform: scale(1.05);
+        }
+        .mindmap-branch .b-icon { font-size: 1.5em; margin-bottom: 6px; }
+        .mindmap-branch .b-title { font-size: 0.85em; font-weight: 600; color: #fff; }
+        .mindmap-branch .b-count { font-size: 0.7em; color: #78909c; margin-top: 4px; }
+
+        .mindmap-svg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .mindmap-svg line {
+            stroke: rgba(100,180,255,0.2);
+            stroke-width: 2;
+            stroke-dasharray: 6 4;
+        }
+
+        .view-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .toggle-btn {
+            padding: 8px 20px;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 20px;
+            background: transparent;
+            color: #90a4ae;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+        .toggle-btn.active {
+            background: rgba(66,165,245,0.2);
+            border-color: #42a5f5;
+            color: #64b5f6;
+        }
+        .toggle-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .search-box {
+            max-width: 500px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px 12px 44px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 25px;
+            background: rgba(255,255,255,0.05);
+            color: #e0e0e0;
+            font-size: 0.95em;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .search-box input:focus {
+            border-color: rgba(66,165,245,0.5);
+            background: rgba(255,255,255,0.08);
+        }
+        .search-box input::placeholder { color: #546e7a; }
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #546e7a;
+        }
+
+        .tips-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255,193,7,0.05);
+            border: 1px solid rgba(255,193,7,0.15);
+            border-radius: 16px;
+        }
+        .tips-title {
+            font-size: 1em;
+            font-weight: 600;
+            color: #ffd54f;
+            margin-bottom: 12px;
+        }
+        .tips-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 8px;
+        }
+        .tips-list li {
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            font-size: 0.82em;
+            color: #b0bec5;
+            line-height: 1.5;
+        }
+        .tips-list li strong { color: #ffd54f; }
+
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: #455a64;
+            font-size: 0.8em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.5em; }
+            .categories-grid { grid-template-columns: 1fr; }
+            .nodes-grid { grid-template-columns: 1fr; }
+            .stats-bar { gap: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>📡 业余无线电 A 类知识图谱</h1>
+    <div class="subtitle">整合版 · 基于 CRAC 2025 年题库 · 12大模块 · 618题全覆盖 · 单选32+多选8=合格30</div>
+    <div class="badge">📋 整合双版精华 · 知识点更全面细致 · 2025新法规已纳入</div>
+    <div class="header-actions">
+        <a href="index.html" class="back-link" title="返回模拟考试">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            返回考试系统
+        </a>
+    </div>
+</div>
+
+<div class="stats-bar">
+    <div class="stat-item">
+        <div class="stat-num">12</div>
+        <div class="stat-label">知识模块</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-num">60+</div>
+        <div class="stat-label">核心考点</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-num">618</div>
+        <div class="stat-label">题库总量</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-num">32+8</div>
+        <div class="stat-label">单选+多选</div>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="搜索知识点、关键词..." oninput="filterNodes(this.value)">
+    </div>
+
+    <div class="view-toggle">
+        <button class="toggle-btn active" onclick="switchView('card')">📊 卡片视图</button>
+        <button class="toggle-btn" onclick="switchView('mindmap')">🧠 思维导图</button>
+    </div>
+
+    <div id="cardView">
+        <div class="categories-grid" id="categoriesGrid"></div>
+        <div class="detail-panel" id="detailPanel"></div>
+    </div>
+
+    <div class="mindmap-container" id="mindmapView">
+        <svg class="mindmap-svg" id="mindmapSvg"></svg>
+        <div class="mindmap-center">📡<br>业余无线电<br>A 类</div>
+    </div>
+
+    <div class="tips-section">
+        <div class="tips-title">💡 2025 考试规则与备考要点</div>
+        <ul class="tips-list">
+            <li><strong>📋 考试规则：</strong>共 40 道题（单选题 32 道 + 多选题 8 道），答对 30 道及以上为合格（75%），考试时间 40 分钟</li>
+            <li><strong>📌 新规重点（2024版《业余无线电台管理办法》）：</strong>未成年人可设台、执照电子化等同纸质、擅自设台处罚加重</li>
+            <li><strong>📌 处罚力度：</strong>擅自设台罚 5 万起、干扰安全通信最高罚 50 万、造假证罚 3 万，情节严重可判 3~7 年</li>
+            <li><strong>📌 频率划分：</strong>HF 3~30MHz / VHF 30~300MHz / UHF 300~3000MHz，A 类限 30~3000MHz、发射功率 ≤25W</li>
+            <li><strong>📌 业余频段：</strong>50~54MHz、144~148MHz 为主要业务，430~440MHz 为次要业务（需避让 435~438MHz 卫星频段）</li>
+            <li><strong>📌 中继台参数：</strong>144MHz 频段标准频差 600kHz，430MHz 频段标准频差 5MHz，上下行频率间隔固定</li>
+            <li><strong>📌 Q 简语必记（高频考点）：</strong>QRL(有人用吗)、QRZ(谁呼叫我)、QRM(人为干扰)、QRN(天电干扰)、QTH(位置)、QSL(确认抄收)</li>
+            <li><strong>📌 安全电压与防雷：</strong>安全特低电压 24V，避雷针保护范围 45° 圆锥体，接地电阻宜小</li>
+            <li><strong>📌 天线与馈线：</strong>驻波比理想值 1:1，同轴电缆阻抗 50Ω，400MHz 以上用 N 型连接器</li>
+            <li><strong>📌 应急通信：</strong>突发重大自然灾害时可与非业余电台通信，紧急设台需 48h 内向无线电管理机构报告</li>
+            <li><strong>📌 多选技巧：</strong>多选题集中在法规制度、操作规范、设备技术三大模块；注意排除绝对化表述，关注并列选项</li>
+            <li><strong>📌 单选技巧：</strong>政策题优先选最长/最短选项；计算题注意有效值=峰值×0.707；频段题熟记关键数字</li>
+        </ul>
+    </div>
+</div>
+
+<div class="footer">
+    📡 业余无线电 A 类知识图谱 · 2025整合版 · 考点分布：单选32题+多选8题 · 合格线：30题 · 仅供学习参考
+</div>
+
+<script>
+const knowledgeData = {
+    "1": {
+        icon: "📜",
+        title: "无线电管理法律法规",
+        subtitle: "★★★★★ 高频·多选重灾区 | 法规体系、设台执照、频率管理、使用规范、处罚监督",
+        accent: "#42a5f5",
+        accentRgb: "66,165,245",
+        chapters: {
+            "1.1": {
+                title: "1.1 无线电管理法规体系",
+                nodes: [
+                    { code: "1.1.1", title: "《无线电管理条例》与制定机构", tags: ["核心","高频"], desc: "国务院+中央军委制定，工信部主管。国家级行政法规，最高效力层级" },
+                    { code: "1.1.2", title: "《业余无线电台管理办法》", tags: ["核心","2025新规"], desc: "工信部制定，2024年3月1日施行最新版。部门规章，具体规范业余电台管理" },
+                    { code: "1.1.3", title: "《无线电频率划分规定》", tags: ["高频"], desc: "定义业余业务、卫星业余业务、业余电台等术语，划分/分配/指配三概念区分" },
+                    { code: "1.1.4", title: "业余无线电爱好者定义", tags: ["高频","多选高频"], desc: "经正式批准、兴趣纯属个人爱好、不涉及谋利。多选常考正确定性" }
+                ]
+            },
+            "1.2": {
+                title: "1.2 设台条件与执照管理",
+                nodes: [
+                    { code: "1.2.1", title: "设台申请条件", tags: ["核心","高频","多选高频"], desc: "个人/单位均可申请，需具备操作证书。未成年人可申请（2024新规）" },
+                    { code: "1.2.2", title: "执照有效期与续期", tags: ["核心"], desc: "5年有效期，届满前30个工作日内申请更换。电子执照与纸质同等效力" },
+                    { code: "1.2.3", title: "执照变更与注销", tags: [], desc: "信息变更及时办理变更手续。停用/撤销需申请注销，不得私自转让" }
+                ]
+            },
+            "1.3": {
+                title: "1.3 操作技术能力验证",
+                nodes: [
+                    { code: "1.3.1", title: "A/B/C三类操作资格", tags: ["核心","高频"], desc: "A类：30~3000MHz、≤25W；B/C类可操作更多频段功率。CRAC颁发操作证书" },
+                    { code: "1.3.2", title: "A类操作限制", tags: ["核心"], desc: "频率范围30~3000MHz（VHF/UHF段），发射功率≤25W，不可用于HF短波频段" }
+                ]
+            },
+            "1.4": {
+                title: "1.4 频率使用与管理",
+                nodes: [
+                    { code: "1.4.1", title: "业余业务频率划分", tags: ["核心","高频"], desc: "50~54MHz、144~148MHz主要业务；430~440MHz次要业务，需避让435~438MHz卫星段" },
+                    { code: "1.4.2", title: "频率使用原则", tags: ["高频","多选高频"], desc: "平等使用权、先听后发、测试用空闲频率。不占用已分配频段、不干扰已有通信" }
+                ]
+            },
+            "1.5": {
+                title: "1.5 电台使用规范",
+                nodes: [
+                    { code: "1.5.1", title: "电台呼号管理", tags: ["核心","高频","多选高频"], desc: "唯一标识、禁止擅自编制。异地操作加B+操作地代码+/，客席操作可用对方呼号" },
+                    { code: "1.5.2", title: "通信内容规范", tags: ["核心","高频"], desc: "限业余频段明语通信、禁止商业牟利、禁止转发广播/互联网内容、禁止加密通信" },
+                    { code: "1.5.3", title: "中继台使用规则", tags: [], desc: "平等免费服务，需遵守中继台使用规定，不得长时间占用或恶意干扰" }
+                ]
+            },
+            "1.6": {
+                title: "1.6 应急通信",
+                nodes: [
+                    { code: "1.6.1", title: "应急通信条件", tags: ["核心","高频"], desc: "仅在突发重大自然灾害等紧急情况下，可与非业余电台进行应急通信" },
+                    { code: "1.6.2", title: "紧急设台与报告", tags: ["高频"], desc: "紧急情况下可临时设台，须在48小时内向无线电管理机构报告" }
+                ]
+            },
+            "1.7": {
+                title: "1.7 监督检查与处罚",
+                nodes: [
+                    { code: "1.7.1", title: "无线电管制与检查", tags: ["高频"], desc: "频谱资源国有，管制限特定时间区域。管理机构有权进入现场检查，可查封设备" },
+                    { code: "1.7.2", title: "违法行为与处罚标准", tags: ["核心","高频","多选高频"], desc: "擅设电台罚5万起；干扰安全通信最高罚50万；伪造证照罚3万；情节严重可判3~7年" },
+                    { code: "1.7.3", title: "多选常见考点", tags: ["多选高频"], desc: "处罚类型、罚款金额、刑事责任条件。注意区分不同违法情节对应不同处罚幅度" }
+                ]
+            },
+            "1.8": {
+                title: "1.8 电磁辐射与环境保护",
+                nodes: [
+                    { code: "1.8.1", title: "电磁环境控制限值", tags: ["2025新规"], desc: "GB 8702-2014《电磁环境控制限值》，公众暴露限值，6分钟方均根值衡量" },
+                    { code: "1.8.2", title: "豁免管理规定", tags: ["2025新规"], desc: "100W以下设备向无屏蔽空间发射可免于管理。通信工程环保标准GB/T 51391" }
+                ]
+            }
+        }
+    },
+    "2": {
+        icon: "📻",
+        title: "通信程序与操作规范",
+        subtitle: "★★★★★ 高频·多选重灾区 | 呼叫程序、Q简语、呼号系统、信号报告、QSL与日志",
+        accent: "#66bb6a",
+        accentRgb: "102,187,106",
+        chapters: {
+            "2.1": {
+                title: "2.1 呼叫与通联程序",
+                nodes: [
+                    { code: "2.1.1", title: "CQ呼叫格式", tags: ["核心","高频","多选高频"], desc: "CQ CQ CQ DE [呼号] [呼号] [呼号] K。先报自己呼号，回答先报对方呼号再报自己" },
+                    { code: "2.1.2", title: "通联前准备", tags: ["核心"], desc: "先收听确认频率空闲、测试选空闲频率、QRL询问是否有人使用" },
+                    { code: "2.1.3", title: "通联基本流程", tags: ["高频"], desc: "呼叫→应答→确认→通联（交换信号报告/QTH/设备）→结束（73祝福）" }
+                ]
+            },
+            "2.2": {
+                title: "2.2 Q简语",
+                nodes: [
+                    { code: "2.2.1", title: "Q简语(高频)", tags: ["核心","高频"], desc: "QSL确认抄收/QRL有人用吗/QRZ谁呼叫我/QTH位置/QRM人为干扰/QRN天电干扰" },
+                    { code: "2.2.2", title: "Q简语(中频)", tags: ["高频"], desc: "QSO通联/QRT停止发送/QSY改频/QRP降低功率/QRV准备好了/QSP中转" },
+                    { code: "2.2.3", title: "Q简语应用场景", tags: [], desc: "频率占用判断用QRL、信号报告交换用QSL/QRM/QRN、通信确认用QSL" },
+                    { code: "2.2.4", title: "Q简语注意事项", tags: [], desc: "仅使用公认标准Q简语，不使用自创简语。发送Q简语后可加?表示疑问" }
+                ]
+            },
+            "2.3": {
+                title: "2.3 呼号系统",
+                nodes: [
+                    { code: "2.3.1", title: "呼号结构与分区", tags: ["核心","高频","多选高频"], desc: "前缀B表示中国/首位数字表分区。我国CQ分区23/24/27需区分。ITU分区中国在43/44区" },
+                    { code: "2.3.2", title: "异地操作呼号", tags: ["高频"], desc: "到B区外操作加B+操作地代码+/，如B7/。客席操作可用对方电台呼号" },
+                    { code: "2.3.3", title: "省级分区号记忆", tags: ["多选高频"], desc: "多选常考各省分区号归属。如7区湖南/广东/广西/海南，8区四川/重庆/贵州/云南" }
+                ]
+            },
+            "2.4": {
+                title: "2.4 信号报告RST",
+                nodes: [
+                    { code: "2.4.1", title: "RST信号报告系统", tags: ["核心","高频"], desc: "R可辨度(1-5)/S信号强度(1-9)/T音调(1-9)。59表示最强信号，59+表示超强" },
+                    { code: "2.4.2", title: "信号报告交换", tags: ["核心"], desc: "通联必须互发呼号和信号报告，先报对方信号再报自己。双方确认收到" }
+                ]
+            },
+            "2.5": {
+                title: "2.5 QSL卡片与日志",
+                nodes: [
+                    { code: "2.5.1", title: "QSL卡片规则", tags: ["核心","高频"], desc: "确认通联凭证。急需加附SASE回信信封。Eye ball QSO当面确认也可作为确认方式" },
+                    { code: "2.5.2", title: "通联日志记录", tags: ["高频"], desc: "必须记载通信模式(MODE)、日期时间、频率、对方呼号、信号报告。日志保存至少1年" }
+                ]
+            },
+            "2.6": {
+                title: "2.6 梅登海德网格定位",
+                nodes: [
+                    { code: "2.6.1", title: "网格定位系统", tags: [], desc: "Maidenhead Locator System，利用经纬度编码为字母+数字组合表示地理位置" },
+                    { code: "2.6.2", title: "网格格式与应用", tags: [], desc: "6位网格如OL63ma精度约10km，用于位置报告和VHF/UHF竞赛分数计算" }
+                ]
+            }
+        }
+    },
+    "3": {
+        icon: "⚡",
+        title: "电学与电路基础",
+        subtitle: "★★★★ 高频 | 基本电学概念、功率计算、阻抗匹配、波形分析",
+        accent: "#ffa726",
+        accentRgb: "255,167,38",
+        chapters: {
+            "3.1": {
+                title: "3.1 基本电学概念",
+                nodes: [
+                    { code: "3.1.1", title: "交流电有效值计算", tags: ["核心","高频"], desc: "有效值=峰值×0.707。峰-峰值100V则峰值50V→有效值35.4V；峰值100V→有效值70.7V" },
+                    { code: "3.1.2", title: "正弦交流电特性", tags: ["高频"], desc: "平均值=0。周期T=1/f。f=50Hz时T=0.02s。ω=2πf，相位差影响叠加结果" },
+                    { code: "3.1.3", title: "电容与电感", tags: [], desc: "电容隔直通交(容抗Xc=1/2πfC)、电感隔交通直(感抗XL=2πfL)。谐振时Xc=XL" }
+                ]
+            },
+            "3.2": {
+                title: "3.2 功率与阻抗",
+                nodes: [
+                    { code: "3.2.1", title: "功率计算公式", tags: ["核心","高频"], desc: "P=UI=I²R=U²/R。电阻性负载功率因数=1。A类发射功率限≤25W PEP" },
+                    { code: "3.2.2", title: "阻抗与匹配", tags: ["核心","高频"], desc: "同轴电缆特征阻抗50Ω。阻抗匹配使功率传输最大化，失配会产生反射损耗" },
+                    { code: "3.2.3", title: "dB与功率换算", tags: ["高频"], desc: "3dB≈2倍功率、6dB≈4倍、10dB≈10倍。功率差题选0.8倍（-1dB对应约0.8倍）" }
+                ]
+            },
+            "3.3": {
+                title: "3.3 频率与波长",
+                nodes: [
+                    { code: "3.3.1", title: "频率-波长关系", tags: ["核心"], desc: "λ=c/f。c=3×10⁸m/s。30MHz对应10m波长，300MHz对应1m波长" },
+                    { code: "3.3.2", title: "频段划分标准", tags: [], desc: "LF低频/VLF甚低频/MF中频/HF高频(3-30MHz)/VHF甚高频(30-300MHz)/UHF特高频(300-3000MHz)" }
+                ]
+            }
+        }
+    },
+    "4": {
+        icon: "📡",
+        title: "天线与馈线系统",
+        subtitle: "★★★★ 高频 | 天线类型、增益参数、馈线规范、驻波比、安装防雷",
+        accent: "#ef5350",
+        accentRgb: "239,83,80",
+        chapters: {
+            "4.1": {
+                title: "4.1 天线类型与特性",
+                nodes: [
+                    { code: "4.1.1", title: "常见天线类型", tags: ["核心","高频"], desc: "DP偶极天线(水平架设/8字形方向图)、GP垂直接地天线(全向/垂直极化)、YAGI八木天线(定向/高增益)、橡胶天线(螺旋加感/效率低)" },
+                    { code: "4.1.2", title: "天线极化方式", tags: ["高频"], desc: "水平极化与垂直极化需匹配；极化方向不一致损耗大。VHF/UHF常用垂直极化" },
+                    { code: "4.1.3", title: "天线长度计算", tags: ["核心"], desc: "半波长=λ/2，1/4波长=λ/4。半波偶极天线总长度≈λ/2×缩短系数(0.95)" }
+                ]
+            },
+            "4.2": {
+                title: "4.2 天线参数与增益",
+                nodes: [
+                    { code: "4.2.1", title: "增益单位dBi/dBd", tags: ["核心","高频"], desc: "dBi以理想点源为基准，dBd以半波偶极子为基准。dBd=dBi-2.15dB。方向图主瓣增益最大" },
+                    { code: "4.2.2", title: "天线方向图", tags: [], desc: "主瓣(最大辐射方向)、旁瓣(次要方向)、后瓣(背面)。波瓣宽度越窄方向性越强" }
+                ]
+            },
+            "4.3": {
+                title: "4.3 馈线与连接器",
+                nodes: [
+                    { code: "4.3.1", title: "同轴电缆规范", tags: ["核心","高频"], desc: "业余电台标准阻抗50Ω。空气介质电缆损耗低但需防潮。实心聚乙烯介质更耐用" },
+                    { code: "4.3.2", title: "连接器选型", tags: ["高频"], desc: "M型/UHF头：广泛用于HF/VHF频段；N型连接器：适合400MHz以上UHF频段，特性阻抗恒定" },
+                    { code: "4.3.3", title: "馈线损耗", tags: [], desc: "频率越高损耗越大、线越长损耗越大。UHF段宜短馈线，HF段可容忍较长馈线" }
+                ]
+            },
+            "4.4": {
+                title: "4.4 驻波比(SWR)与匹配",
+                nodes: [
+                    { code: "4.4.1", title: "驻波比核心概念", tags: ["核心","高频"], desc: "SWR理想值1:1(完美匹配)，越大匹配越差。SWR>3:1需调整天线或匹配网络" },
+                    { code: "4.4.2", title: "天线匹配方法", tags: [], desc: "调整天线长度、使用天调(ATU/Tuner)、巴伦(Balun)平衡-不平衡转换" },
+                    { code: "4.4.3", title: "假负载用途", tags: [], desc: "50Ω纯电阻无感负载，用于测试发射机输出功率。吸收全部功率不辐射电磁波" }
+                ]
+            },
+            "4.5": {
+                title: "4.5 天线安装与防雷",
+                nodes: [
+                    { code: "4.5.1", title: "避雷针保护范围", tags: ["核心","高频"], desc: "保护角45°圆锥体覆盖范围。天线应在避雷针保护范围内。接地电阻宜小" },
+                    { code: "4.5.2", title: "天线安装要点", tags: [], desc: "远离高压线、牢固固定防风、馈线防水弯、接地系统完善。同轴电缆避免急弯" }
+                ]
+            }
+        }
+    },
+    "5": {
+        icon: "🎚️",
+        title: "调制与发射技术",
+        subtitle: "★★★ 中频 | 调制方式FM/SSB/AM、发射类别代码、杂散发射、技术指标",
+        accent: "#7c4dff",
+        accentRgb: "124,77,255",
+        chapters: {
+            "5.1": {
+                title: "5.1 调制方式",
+                nodes: [
+                    { code: "5.1.1", title: "FM调频制", tags: ["核心","高频"], desc: "NFM窄带调频(带宽约12.5kHz)用于语音；WFM宽带调频(带宽约200kHz)用于广播。NFM收WFM音小，WFM收NFM失真" },
+                    { code: "5.1.2", title: "SSB单边带制", tags: ["核心","高频"], desc: "USB上边带用于10MHz以上；LSB下边带用于10MHz及以下。带宽约3kHz，功率效率高" },
+                    { code: "5.1.3", title: "AM调幅制", tags: [], desc: "载波+双边带，带宽≈2×调制频率。效率低但接收简单。FM抗干扰优于AM" }
+                ]
+            },
+            "5.2": {
+                title: "5.2 发射类别代码",
+                nodes: [
+                    { code: "5.2.1", title: "ITU发射类别代码", tags: ["核心","高频"], desc: "A1A=CW等幅电报、J3E=SSB单边带话、F3E=FM调频话。三字母代码表示调制/信号/信息" },
+                    { code: "5.2.2", title: "常见模式代码", tags: [], desc: "A3E=AM话、G3E=PM调相话、F2D=FM数据。代码第一字主载波调制、第二字信号性质、第三字信息类型" }
+                ]
+            },
+            "5.3": {
+                title: "5.3 发射技术指标",
+                nodes: [
+                    { code: "5.3.1", title: "杂散发射", tags: ["核心","高频","多选高频"], desc: "含谐波辐射、寄生发射、互调产物。必须符合国家标准限值，多选常考定义与类型" },
+                    { code: "5.3.2", title: "频率容限与稳定度", tags: [], desc: "发射频率必须保持稳定，频率偏移不得超过规定容限。温飘、老化都会影响稳定度" },
+                    { code: "5.3.3", title: "邻道功率与占用带宽", tags: [], desc: "邻道功率是发射机在相邻信道产生的功率，应尽量小。占用带宽不得超过指配带宽" }
+                ]
+            }
+        }
+    },
+    "6": {
+        icon: "🛡️",
+        title: "安全防护",
+        subtitle: "★★★ 中频 | 用电安全、射频辐射防护、防雷接地、应急处理",
+        accent: "#ab47bc",
+        accentRgb: "171,71,188",
+        chapters: {
+            "6.1": {
+                title: "6.1 用电安全",
+                nodes: [
+                    { code: "6.1.1", title: "安全电压与电流", tags: ["核心","高频"], desc: "安全特低电压≤24V。直流比交流(同电压)致死危险性低。人身安全电流约10mA" },
+                    { code: "6.1.2", title: "触电防护措施", tags: ["高频","多选高频"], desc: "绝缘保护、设备接地(三芯插头)、安装漏电保护器。湿手不操作电气设备。多选常考综合防护措施" },
+                    { code: "6.1.3", title: "触电急救", tags: [], desc: "立即断电或用绝缘物挑开→判断意识→心肺复苏(CPR)→拨打120。先断电再接触伤者" },
+                    { code: "6.1.4", title: "设备安全注意", tags: [], desc: "定期检查电源线和插头、设备散热通风良好、避免过载使用、维修断电操作" }
+                ]
+            },
+            "6.2": {
+                title: "6.2 射频辐射安全",
+                nodes: [
+                    { code: "6.2.1", title: "射频辐射限值", tags: ["核心","高频"], desc: "人体暴露限值以SAR(比吸收率)或电场/功率密度衡量。天线应远离人员活动区域" },
+                    { code: "6.2.2", title: "辐射安全评估", tags: [], desc: "发射功率大、天线增益高、频率高时需做安全评估。车台天线宜安装在车顶远离乘员" }
+                ]
+            },
+            "6.3": {
+                title: "6.3 防雷与接地",
+                nodes: [
+                    { code: "6.3.1", title: "防雷保护系统", tags: ["核心","高频"], desc: "避雷针保护角45°圆锥体。接地电阻越小越好(<10Ω)。雷雨天气断开天线连接" },
+                    { code: "6.3.2", title: "接地系统设计", tags: [], desc: "设备外壳保护接地、天线系统防雷接地、电源系统接地三者宜共用接地体" }
+                ]
+            }
+        }
+    },
+    "7": {
+        icon: "📶",
+        title: "频率与波段规划",
+        subtitle: "★★★ 中频 | 业余业务频段、卫星专用频段、特殊频率点、ITU分区",
+        accent: "#26c6da",
+        accentRgb: "38,198,218",
+        chapters: {
+            "7.1": {
+                title: "7.1 业余业务频段划分",
+                nodes: [
+                    { code: "7.1.1", title: "HF短波频段", tags: ["核心"], desc: "160m:1.8-2.0MHz/80m:3.5-3.9MHz/40m:7.0-7.2MHz(专用)/20m:14.0-14.35MHz(专用)/15m:21.0-21.45MHz/10m:28.0-29.7MHz" },
+                    { code: "7.1.2", title: "VHF/UHF频段(A类可用)", tags: ["核心","高频"], desc: "6m:50-54MHz(主要业务)/2m:144-148MHz(主要业务)/0.7m:430-440MHz(次要业务,需避让卫星段)" },
+                    { code: "7.1.3", title: "主要业务vs次要业务", tags: ["高频"], desc: "主要业务受保护优先级高；次要业务不得干扰主要业务，不受主要业务保护。430-440MHz是典型次要业务案例" }
+                ]
+            },
+            "7.2": {
+                title: "7.2 卫星业余业务频段",
+                nodes: [
+                    { code: "7.2.1", title: "卫星业余专用频段", tags: ["核心"], desc: "10m:29.3-29.51MHz / 2m:145.8-146MHz / 0.7m:435-438MHz。均不可用于普通地面语音通信" },
+                    { code: "7.2.2", title: "卫星频段注意事项", tags: [], desc: "A类可操作2m和0.7m卫星频段但须在操作证书允许范围内。上下行频率因多普勒效应需补偿" }
+                ]
+            },
+            "7.3": {
+                title: "7.3 邻近业务与特殊频率",
+                nodes: [
+                    { code: "7.3.1", title: "业余与WiFi/卫星电视相邻频段", tags: ["高频"], desc: "2.3-2.45GHz最接近WiFi(2.4GHz)；5.65-5.85GHz最接近C波段卫星电视；10-10.5GHz最接近Ku波段" },
+                    { code: "7.3.2", title: "业余业务频段上下限", tags: [], desc: "最低业余频段:135.7-137.8kHz(LF)；最高业余频段:241-250GHz(EHF毫米波段)" }
+                ]
+            },
+            "7.4": {
+                title: "7.4 ITU分区",
+                nodes: [
+                    { code: "7.4.1", title: "国际电联三区划分", tags: ["核心","高频"], desc: "1区:欧洲/非洲/俄罗斯亚洲部分/蒙古；2区:南北美洲；3区:亚洲(除俄蒙)/大洋洲。中国在3区" }
+                ]
+            }
+        }
+    },
+    "8": {
+        icon: "🔧",
+        title: "电磁兼容与干扰抑制",
+        subtitle: "★★ 中低频 | 干扰识别、EMC设计、滤波屏蔽、接收机保护",
+        accent: "#ff5722",
+        accentRgb: "255,87,34",
+        chapters: {
+            "8.1": {
+                title: "8.1 干扰识别与分类",
+                nodes: [
+                    { code: "8.1.1", title: "干扰类型", tags: ["核心","高频"], desc: "同频干扰、邻频干扰、互调干扰、杂散辐射干扰。QRM人为干扰/QRN天电干扰" },
+                    { code: "8.1.2", title: "干扰源识别", tags: [], desc: "电力线/开关电源/LED灯/PLC通信/电动车充电桩。寻找干扰源可用便携接收机测向" }
+                ]
+            },
+            "8.2": {
+                title: "8.2 干扰抑制技术",
+                nodes: [
+                    { code: "8.2.1", title: "干扰抑制方法", tags: ["核心","高频"], desc: "加装滤波器(低通/高通/带通)、屏蔽、良好接地、磁环(铁氧体磁珠)、物理隔离" },
+                    { code: "8.2.2", title: "设备EMC设计", tags: [], desc: "杂散辐射抑制、频率容限保证、发射机输出滤波。关键指标:邻道功率比、谐波抑制比" }
+                ]
+            },
+            "8.3": {
+                title: "8.3 接收机防护",
+                nodes: [
+                    { code: "8.3.1", title: "接收机保护措施", tags: [], desc: "前端带通滤波、限幅保护、防静电设计、AGC自动增益控制防止强信号过载" },
+                    { code: "8.3.2", title: "镜像频率与选择性", tags: [], desc: "镜像频率是超外差接收机固有缺陷。镜像抑制比衡量抑制能力。中频选择影响镜像频率位置" }
+                ]
+            }
+        }
+    },
+    "9": {
+        icon: "🌊",
+        title: "电波传播特性",
+        subtitle: "★ 低频 | 传播方式、电离层特性、多径效应、特殊传播现象",
+        accent: "#00bcd4",
+        accentRgb: "0,188,212",
+        chapters: {
+            "9.1": {
+                title: "9.1 电波传播方式",
+                nodes: [
+                    { code: "9.1.1", title: "基本传播方式", tags: ["核心"], desc: "地波(沿地面绕射/传播距离短)、天波(电离层反射/HF远距离)、直射波(视线传播/VHF/UHF)、散射波" },
+                    { code: "9.1.2", title: "各频段传播特性", tags: ["高频"], desc: "HF依靠天波达数千公里、VHF/UHF主要靠直射波(视距传播)、微波穿透电离层用于卫星通信" }
+                ]
+            },
+            "9.2": {
+                title: "9.2 特殊传播现象",
+                nodes: [
+                    { code: "9.2.1", title: "多径传播", tags: ["高频"], desc: "信号经不同路径到达接收端→相位干涉引起衰落和失真。TV重影是典型多径效应" },
+                    { code: "9.2.2", title: "超视距传播", tags: [], desc: "大气波导(温逆层折射)、突发E层反射、流星余迹反射可实现VHF超视距传播" },
+                    { code: "9.2.3", title: "多普勒效应", tags: [], desc: "卫星等高速移动目标引起频率偏移。接收频率随相对速度变化，需频率跟踪补偿" }
+                ]
+            }
+        }
+    },
+    "10": {
+        icon: "🔩",
+        title: "设备知识与参数",
+        subtitle: "★★★ 中频 | 收发信机原理、A类设备规范、操作流程、接收机指标",
+        accent: "#8bc34a",
+        accentRgb: "139,195,74",
+        chapters: {
+            "10.1": {
+                title: "10.1 发射机与接收机",
+                nodes: [
+                    { code: "10.1.1", title: "A类设备规范", tags: ["核心","高频"], desc: "发射功率≤25W PEP、频率范围30~3000MHz、频率稳定度符合国标、杂散辐射符合限值" },
+                    { code: "10.1.2", title: "接收机架构", tags: [], desc: "超外差式(主流)：混频→中放→检波；直放式(TRF):简单但选择性差。超外差灵敏度高选择性好" },
+                    { code: "10.1.3", title: "接收机关键指标", tags: ["高频"], desc: "灵敏度(接收微弱信号能力)、选择性(区分相邻频率能力)、动态范围、镜像抑制、邻道抑制" }
+                ]
+            },
+            "10.2": {
+                title: "10.2 设备操作与维护",
+                nodes: [
+                    { code: "10.2.1", title: "标准操作流程", tags: ["核心","高频"], desc: "开机→选频→收听→呼叫(频率空闲时)→通联→记录日志→关机。先听后发是核心原则" },
+                    { code: "10.2.2", title: "设备维护要点", tags: [], desc: "定期检查天线馈线接头、保持设备散热、防潮防尘、电池按规范充放电、固件及时更新" },
+                    { code: "10.2.3", title: "常见故障排查", tags: [], desc: "无发射检查电源/功放/天线、无接收检查天线/SQL静噪/频率。SWR过高检查天线匹配" }
+                ]
+            }
+        }
+    },
+    "11": {
+        icon: "📝",
+        title: "缩略语与通信术语",
+        subtitle: "★★ 中低频·贯穿全卷 | 核心Q简语、常用缩略语、通信规范用语",
+        accent: "#ff4081",
+        accentRgb: "255,64,129",
+        chapters: {
+            "11.1": {
+                title: "11.1 核心Q简语汇总",
+                nodes: [
+                    { code: "11.1.1", title: "最高频Q简语", tags: ["核心","高频"], desc: "QSL确认/QRL占用/QRZ谁叫/QTH位置/QRM人扰/QRN天扰/QRT停发/QRP降功率" },
+                    { code: "11.1.2", title: "次高频Q简语", tags: [], desc: "QSY改频/QSO通联/QRO增功率/QRV准备/QRX等待/QRU无事了/QSD信号差" }
+                ]
+            },
+            "11.2": {
+                title: "11.2 常用缩略语",
+                nodes: [
+                    { code: "11.2.1", title: "通信常用缩略语", tags: ["核心","高频"], desc: "CQ广泛呼叫/DE来自/K结束请讲/R已抄收/BK插入/OM老朋友/73美好祝愿/YL女士/XYL妻子" },
+                    { code: "11.2.2", title: "技术常用缩略语", tags: [], desc: "RF射频/ANT天线/GND接地/WX天气/DX远距离/VFO可变频率振荡器/PLL锁相环" },
+                    { code: "11.2.3", title: "TU/TNX含意", tags: [], desc: "TU=Thank You谢谢你/TNX=Thanks谢谢/PSE=Please请/HW=How怎么样" }
+                ]
+            }
+        }
+    },
+    "12": {
+        icon: "🔬",
+        title: "特殊通信技术与模式",
+        subtitle: "★ 低频 | ATV业余电视、DSSTV数字慢扫描、数据通信、信标台",
+        accent: "#ff9800",
+        accentRgb: "255,152,0",
+        chapters: {
+            "12.1": {
+                title: "12.1 特殊通信模式",
+                nodes: [
+                    { code: "12.1.1", title: "ATV业余电视", tags: [], desc: "使用VSB残留边带调制时图像重影原因:多径传播。带宽较宽，需用UHF以上频段" },
+                    { code: "12.1.2", title: "DSSTV数字慢扫描电视", tags: [], desc: "倾向用SSB传输(FM有门限效应)。逐行扫描，适合窄带信道传输静止图像" }
+                ]
+            },
+            "12.2": {
+                title: "12.2 其他特殊应用",
+                nodes: [
+                    { code: "12.2.1", title: "信标台与中继台", tags: [], desc: "信标台持续发射标识信号辅助传播监测。中继台接收后转发实现大范围覆盖" },
+                    { code: "12.2.2", title: "数字通信模式", tags: [], desc: "FT8/JT65弱信号数字模式、APRS自动位置报告系统、D-STAR/DMR数字语音模式" }
+                ]
+            }
+        }
+    }
+};
+
+function renderCategories() {
+    const grid = document.getElementById('categoriesGrid');
+    grid.innerHTML = '';
+    for (const [key, cat] of Object.entries(knowledgeData)) {
+        let totalNodes = 0;
+        for (const ch of Object.values(cat.chapters)) totalNodes += ch.nodes.length;
+        
+        const card = document.createElement('div');
+        card.className = 'category-card';
+        card.style.setProperty('--accent', cat.accent);
+        card.style.setProperty('--accent-rgb', cat.accentRgb);
+        card.setAttribute('data-id', key);
+        card.onclick = () => showDetail(key);
+        card.innerHTML = `
+            <div class="card-icon">${cat.icon}</div>
+            <div class="card-title">${cat.title}</div>
+            <div class="card-desc">${cat.subtitle}</div>
+            <div class="card-count">${totalNodes} 个知识点</div>
+        `;
+        grid.appendChild(card);
+    }
+}
+
+function showDetail(catId) {
+    const cat = knowledgeData[catId];
+    const panel = document.getElementById('detailPanel');
+    
+    let html = `
+        <div class="detail-header">
+            <div class="detail-icon">${cat.icon}</div>
+            <div>
+                <div class="detail-title">${cat.title}</div>
+                <div class="detail-subtitle">${cat.subtitle}</div>
+            </div>
+            <button class="close-btn" onclick="closeDetail()">✕</button>
+        </div>
+    `;
+    
+    for (const [chKey, chapter] of Object.entries(cat.chapters)) {
+        html += `<h3 style="color:${cat.accent};margin:16px 0 10px;font-size:0.95em;">${chapter.title}</h3>`;
+        html += '<div class="nodes-grid">';
+        for (const node of chapter.nodes) {
+            const tagsHtml = node.tags.map(t => {
+                let cls = 'tag';
+                if (t === '核心') cls += ' hot';
+                if (t === '高频') cls += ' hot';
+                if (t === '多选高频') cls += ' multi';
+                if (t === '新规' || t === '新法规' || t === '2025新规') cls += ' new';
+                return `<span class="${cls}">${t}</span>`;
+            }).join('');
+            html += `
+                <div class="node-item">
+                    <div class="node-code">[${node.code}]</div>
+                    <div class="node-title">${node.title}</div>
+                    <div style="font-size:0.78em;color:#78909c;margin-bottom:8px;">${node.desc}</div>
+                    <div class="node-tags">${tagsHtml}</div>
+                </div>
+            `;
+        }
+        html += '</div>';
+    }
+    
+    panel.innerHTML = html;
+    panel.className = 'detail-panel visible';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    document.querySelectorAll('.category-card').forEach(c => c.classList.remove('active'));
+    document.querySelector(`.category-card[data-id="${catId}"]`)?.classList.add('active');
+}
+
+function closeDetail() {
+    document.getElementById('detailPanel').className = 'detail-panel';
+    document.querySelectorAll('.category-card').forEach(c => c.classList.remove('active'));
+}
+
+function renderMindmap() {
+    const container = document.getElementById('mindmapView');
+    const svg = document.getElementById('mindmapSvg');
+    
+    container.querySelectorAll('.mindmap-branch').forEach(b => b.remove());
+    svg.innerHTML = '';
+    
+    const cx = container.offsetWidth / 2;
+    const cy = 400;
+    const radius = 260;
+    const cats = Object.entries(knowledgeData);
+    
+    cats.forEach(([key, cat], i) => {
+        let totalNodes = 0;
+        for (const ch of Object.values(cat.chapters)) totalNodes += ch.nodes.length;
+        
+        const angle = (i / cats.length) * Math.PI * 2 - Math.PI / 2;
+        const x = cx + radius * Math.cos(angle);
+        const y = cy + radius * Math.sin(angle);
+        
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', cx);
+        line.setAttribute('y1', cy);
+        line.setAttribute('x2', x);
+        line.setAttribute('y2', y);
+        svg.appendChild(line);
+        
+        const branch = document.createElement('div');
+        branch.className = 'mindmap-branch';
+        branch.style.left = (x - 90) + 'px';
+        branch.style.top = (y - 40) + 'px';
+        branch.style.borderColor = cat.accent;
+        branch.onclick = () => {
+            switchView('card');
+            showDetail(key);
+        };
+        branch.innerHTML = `
+            <div class="b-icon">${cat.icon}</div>
+            <div class="b-title">${cat.title.replace('无线电管理', '').replace('无线电系统', '系统').replace('业余无线电台', '')}</div>
+            <div class="b-count">${totalNodes} 个考点</div>
+        `;
+        container.appendChild(branch);
+    });
+    
+    container.style.minHeight = (cy + radius + 200) + 'px';
+}
+
+function switchView(view) {
+    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    if (view === 'card') {
+        document.getElementById('cardView').style.display = 'block';
+        document.getElementById('mindmapView').classList.remove('visible');
+    } else {
+        document.getElementById('cardView').style.display = 'none';
+        document.getElementById('mindmapView').classList.add('visible');
+        setTimeout(renderMindmap, 100);
+    }
+}
+
+function filterNodes(query) {
+    if (!query) {
+        renderCategories();
+        document.getElementById('detailPanel').className = 'detail-panel';
+        return;
+    }
+    
+    query = query.toLowerCase();
+    const grid = document.getElementById('categoriesGrid');
+    const panel = document.getElementById('detailPanel');
+    grid.innerHTML = '';
+    
+    let found = false;
+    for (const [key, cat] of Object.entries(knowledgeData)) {
+        for (const [chKey, chapter] of Object.entries(cat.chapters)) {
+            for (const node of chapter.nodes) {
+                if (node.title.toLowerCase().includes(query) || 
+                    node.desc.toLowerCase().includes(query) ||
+                    node.code.includes(query) ||
+                    node.tags.some(t => t.includes(query))) {
+                    found = true;
+                    const card = document.createElement('div');
+                    card.className = 'category-card';
+                    card.style.setProperty('--accent', cat.accent);
+                    card.style.setProperty('--accent-rgb', cat.accentRgb);
+                    card.onclick = () => showDetail(key);
+                    card.innerHTML = `
+                        <div class="card-icon">${cat.icon}</div>
+                        <div class="card-title">[${node.code}] ${node.title}</div>
+                        <div class="card-desc">${node.desc}</div>
+                        <div class="card-count">${cat.title} → ${chapter.title}</div>
+                    `;
+                    grid.appendChild(card);
+                }
+            }
+        }
+    }
+    
+    if (!found) {
+        grid.innerHTML = '<div style="text-align:center;color:#78909c;padding:40px;grid-column:1/-1;">未找到匹配的知识点</div>';
+    }
+    
+    panel.className = 'detail-panel';
+}
+
+renderCategories();
+
+window.addEventListener('resize', () => {
+    if (document.getElementById('mindmapView').classList.contains('visible')) {
+        renderMindmap();
+    }
+});
+</script>
+</body>
+</html>
